@@ -1,0 +1,4 @@
+# Ignore those folders
+.vs/
+Source/bin/
+Source/obj/
