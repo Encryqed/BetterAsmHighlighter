@@ -18,7 +18,7 @@ namespace BetterAsmHighlighter.Data
 
             // Data types
             "db", "dw", "dd", "dq",
-            "byte", "word", "dword", "qword",
+            "byte", "word", "dword", "qword", "ptr",
 
             // Misc
             "extern", "public", "equ", "dup", "org",

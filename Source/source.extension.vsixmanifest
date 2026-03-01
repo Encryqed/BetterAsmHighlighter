@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"
                  xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="BetterAsmHighlighter.Encryqed.f47ac10b-58cc-4372-a567-0e02b2c3d479"
-              Version="1.0.0"
-              Language="en-US"
-              Publisher="encryqed"/>
-    <DisplayName>Better Assembly Highlighter</DisplayName>
-    <Description xml:space="preserve">Syntax highlighting for Intel x86/x64 assembly language files (.asm, .inc, .masm). Customizable color themes.</Description>
-    <Tags>assembly,asm,x86,x64,syntax highlighting,masm,intel</Tags>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,)">
-      <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[17.0,)">
-      <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,)">
-      <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP"
-                DisplayName="Microsoft .NET Framework"
-                d:Source="Manual"
-                Version="[4.7.2,)"/>
-  </Dependencies>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor"
-                  Version="[17.0,)"
-                  DisplayName="Visual Studio core editor"/>
-  </Prerequisites>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.MefComponent"
-           d:Source="Project"
-           d:ProjectName="%CurrentProject%"
-           Path="|%CurrentProject%|"/>
-    <Asset Type="Microsoft.VisualStudio.VsPackage"
-           d:Source="Project"
-           d:ProjectName="%CurrentProject%"
-           Path="|%CurrentProject%;PkgdefProjectOutputGroup|"/>
-  </Assets>
+    <Metadata>
+        <Identity Id="BetterAsmHighlighter.Encryqed.f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                  Version="1.0.1"
+                  Language="en-US"
+                  Publisher="encryqed"/>
+        <DisplayName>Better Assembly Highlighter</DisplayName>
+        <Description xml:space="preserve">Syntax highlighting for Intel x86/x64 assembly language files (.asm, .inc, .masm). Customizable color themes.</Description>
+        <Tags>assembly,asm,x86,x64,syntax highlighting,masm,intel</Tags>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[17.0,)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP"
+                    DisplayName="Microsoft .NET Framework"
+                    d:Source="Manual"
+                    Version="[4.7.2,)"/>
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor"
+                      Version="[17.0,)"
+                      DisplayName="Visual Studio core editor"/>
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.MefComponent"
+               d:Source="Project"
+               d:ProjectName="%CurrentProject%"
+               Path="|%CurrentProject%|"/>
+        <Asset Type="Microsoft.VisualStudio.VsPackage"
+               d:Source="Project"
+               d:ProjectName="%CurrentProject%"
+               Path="|%CurrentProject%;PkgdefProjectOutputGroup|"/>
+    </Assets>
 </PackageManifest>

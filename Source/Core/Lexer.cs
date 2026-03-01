@@ -88,6 +88,15 @@ namespace BetterAsmHighlighter.Core
                 return;
             }
 
+            // EXTERN/EXTRN name:TYPE -> global declaration
+            if (Pos < Line.Length && Line[Pos] == ':' && IsExternContext(Tokens))
+            {
+                Tokens.Add(new Token(TokenType.Global, Offset + Start, Pos - Start, Word));
+                Tokens.Add(new Token(TokenType.Operator, Offset + Pos, 1, ":"));
+                Pos++;
+                return;
+            }
+
             // Label definition (identifier followed by ':')
             if (Pos < Line.Length && Line[Pos] == ':')
             {
@@ -111,6 +120,19 @@ namespace BetterAsmHighlighter.Core
             return TokenType.Unknown;
         }
 
+        private static bool IsExternContext(List<Token> Tokens)
+        {
+            for (int i = Tokens.Count - 1; i >= 0; i--)
+            {
+                if (Tokens[i].Type != TokenType.Directive)
+                    continue;
+
+                string Text = Tokens[i].Text;
+                return Text.Equals("extern", StringComparison.OrdinalIgnoreCase) || Text.Equals("extrn", StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
+        }
+
         private static void PostProcess(List<Token> Tokens)
         {
             if (Tokens.Count < 2)
@@ -129,10 +151,10 @@ namespace BetterAsmHighlighter.Core
             if (First == -1 || Second == -1)
                 return;
 
-            // Name PROC/ENDP -> name is a label
+            // Name PROC/ENDP -> name is a function
             if (Tokens[First].Type == TokenType.Unknown && Tokens[Second].Type == TokenType.Directive && NameDefDirectives.Contains(Tokens[Second].Text))
             {
-                Tokens[First] = new Token(TokenType.Label, Tokens[First].Start, Tokens[First].Length, Tokens[First].Text);
+                Tokens[First] = new Token(TokenType.Function, Tokens[First].Start, Tokens[First].Length, Tokens[First].Text);
             }
         }
 

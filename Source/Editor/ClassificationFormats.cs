@@ -100,7 +100,36 @@ namespace BetterAsmHighlighter.Editor
         public LabelFormat()
         {
             DisplayName = "ASM - Label";
+            ForegroundColor = Color.FromRgb(0xD7, 0xBA, 0x7D);
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = ClassificationTypes.FUNCTION)]
+    [Name("BetterAsmHighlighter.Function")]
+    [UserVisible(true)]
+    [Order(Before = Priority.Default)]
+    internal sealed class FunctionFormat : ClassificationFormatDefinition
+    {
+        public FunctionFormat()
+        {
+            DisplayName = "ASM - Function";
             ForegroundColor = Color.FromRgb(0xDC, 0xDC, 0xAA);
+            IsBold = true;
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = ClassificationTypes.GLOBAL)]
+    [Name("BetterAsmHighlighter.Global")]
+    [UserVisible(true)]
+    [Order(Before = Priority.Default)]
+    internal sealed class GlobalFormat : ClassificationFormatDefinition
+    {
+        public GlobalFormat()
+        {
+            DisplayName = "ASM - Global";
+            ForegroundColor = Color.FromRgb(0x9C, 0xDC, 0xFE);
         }
     }
 

@@ -8,6 +8,8 @@ namespace BetterAsmHighlighter.Core
         Directive,
         Number,
         Label,
+        Function,
+        Global,
         Operator,
         Unknown
     }
