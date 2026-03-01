@@ -27,7 +27,7 @@ namespace BetterAsmHighlighter.Data
             "jl", "jle", "jg", "jge",
 
             // Control flow
-            "call", "ret", "retn", "enter", "leave",
+            "call", "ret", "retn", "enter", "leave", "loop",
 
             // Flags
             "pushfq", "popfq",

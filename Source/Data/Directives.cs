@@ -20,6 +20,9 @@ namespace BetterAsmHighlighter.Data
             "db", "dw", "dd", "dq",
             "byte", "word", "dword", "qword", "ptr",
 
+            // Structure
+            "struct", "ends",
+
             // Misc
             "extern", "public", "equ", "dup", "org",
         };

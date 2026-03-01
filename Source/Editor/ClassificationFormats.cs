@@ -105,6 +105,34 @@ namespace BetterAsmHighlighter.Editor
     }
 
     [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = ClassificationTypes.STRUCTURE)]
+    [Name("BetterAsmHighlighter.Structure")]
+    [UserVisible(true)]
+    [Order(Before = Priority.Default)]
+    internal sealed class StructureFormat : ClassificationFormatDefinition
+    {
+        public StructureFormat()
+        {
+            DisplayName = "ASM - Structure";
+            ForegroundColor = Color.FromRgb(0xD1, 0x9A, 0x66);
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = ClassificationTypes.MEMBER)]
+    [Name("BetterAsmHighlighter.Member")]
+    [UserVisible(true)]
+    [Order(Before = Priority.Default)]
+    internal sealed class MemberFormat : ClassificationFormatDefinition
+    {
+        public MemberFormat()
+        {
+            DisplayName = "ASM - Member";
+            ForegroundColor = Color.FromRgb(0xC8, 0xC8, 0xC8);
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
     [ClassificationType(ClassificationTypeNames = ClassificationTypes.FUNCTION)]
     [Name("BetterAsmHighlighter.Function")]
     [UserVisible(true)]

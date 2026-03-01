@@ -13,9 +13,16 @@ namespace BetterAsmHighlighter.Editor
         private readonly Lexer Lexer;
         private readonly Dictionary<TokenType, IClassificationType> ClassificationMap;
 
+        private static readonly HashSet<string> DataDefDirectives = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "db", "dw", "dd", "dq", "byte", "word", "dword", "qword"
+        };
+
         private HashSet<string> KnownGlobals = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> KnownFunctions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> KnownLabels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private HashSet<string> KnownStructures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private HashSet<int> StructBlockLines = new HashSet<int>();
         private int CachedVersion = -1;
 
         public Classifier(ITextBuffer Buffer, IClassificationTypeRegistryService Registry)
@@ -32,8 +39,11 @@ namespace BetterAsmHighlighter.Editor
                 [TokenType.Register]    = Registry.GetClassificationType(ClassificationTypes.REGISTER),
                 [TokenType.Directive]   = Registry.GetClassificationType(ClassificationTypes.DIRECTIVE),
                 [TokenType.Number]      = Registry.GetClassificationType(ClassificationTypes.NUMBER),
+                [TokenType.String]      = Registry.GetClassificationType(ClassificationTypes.STRING),
                 [TokenType.Label]       = Registry.GetClassificationType(ClassificationTypes.LABEL),
                 [TokenType.Function]    = Registry.GetClassificationType(ClassificationTypes.FUNCTION),
+                [TokenType.Structure]   = Registry.GetClassificationType(ClassificationTypes.STRUCTURE),
+                [TokenType.Member]      = Registry.GetClassificationType(ClassificationTypes.MEMBER),
                 [TokenType.Global]      = Registry.GetClassificationType(ClassificationTypes.GLOBAL),
                 [TokenType.Operator]    = Registry.GetClassificationType(ClassificationTypes.OPERATOR),
             };
@@ -58,6 +68,8 @@ namespace BetterAsmHighlighter.Editor
 
                 List<Token> Tokens = Lexer.TokenizeLine(LineText, LineStart);
 
+                TokenType PrevType = TokenType.Unknown;
+
                 foreach (Token Tok in Tokens)
                 {
                     TokenType Type = Tok.Type;
@@ -70,13 +82,27 @@ namespace BetterAsmHighlighter.Editor
                             Type = TokenType.Function;
                         else if (KnownLabels.Contains(Tok.Text))
                             Type = TokenType.Label;
+                        else if (KnownStructures.Contains(Tok.Text))
+                            Type = TokenType.Structure;
                         else
                             continue;
                     }
 
+                    PrevType = Type;
+
                     if (ClassificationMap.TryGetValue(Type, out IClassificationType? Classification) && Classification != null)
                     {
-                        SnapshotSpan TokenSpan = new SnapshotSpan(Snapshot, Tok.Start, Tok.Length);
+                        int SpanStart = Tok.Start;
+                        int SpanLength = Tok.Length;
+
+                        // Skip the leading '.' for struct member access
+                        if (Type == TokenType.Member && Tok.Text.StartsWith("."))
+                        {
+                            SpanStart++;
+                            SpanLength--;
+                        }
+
+                        SnapshotSpan TokenSpan = new SnapshotSpan(Snapshot, SpanStart, SpanLength);
                         Result.Add(new ClassificationSpan(TokenSpan, Classification));
                     }
                 }
@@ -94,6 +120,10 @@ namespace BetterAsmHighlighter.Editor
             KnownGlobals = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             KnownFunctions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             KnownLabels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            KnownStructures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            StructBlockLines = new HashSet<int>();
+
+            bool bInStructBlock = false;
 
             for (int i = 0; i < Snapshot.LineCount; i++)
             {
@@ -101,6 +131,34 @@ namespace BetterAsmHighlighter.Editor
 
                 if (Tokens.Count < 1)
                     continue;
+
+                // Name STRUCT -> start of struct block
+                if (Tokens.Count >= 2
+                    && Tokens[0].Type == TokenType.Structure
+                    && Tokens[1].Type == TokenType.Directive
+                    && Tokens[1].Text.Equals("struct", StringComparison.OrdinalIgnoreCase))
+                {
+                    KnownStructures.Add(Tokens[0].Text);
+                    bInStructBlock = true;
+                    continue;
+                }
+
+                // Name ENDS -> end of struct block
+                if (Tokens.Count >= 2
+                    && Tokens[0].Type == TokenType.Structure
+                    && Tokens[1].Type == TokenType.Directive
+                    && Tokens[1].Text.Equals("ends", StringComparison.OrdinalIgnoreCase))
+                {
+                    bInStructBlock = false;
+                    continue;
+                }
+
+                // Lines inside struct body
+                if (bInStructBlock)
+                {
+                    StructBlockLines.Add(i);
+                    continue;
+                }
 
                 // EXTERN/EXTRN name:TYPE -> global
                 if (Tokens.Count >= 2 && Tokens[0].Type == TokenType.Directive && Tokens[1].Type == TokenType.Global)
@@ -126,6 +184,36 @@ namespace BetterAsmHighlighter.Editor
                 if (Tokens.Count >= 2 && Tokens[0].Type == TokenType.Function && Tokens[1].Type == TokenType.Directive)
                 {
                     KnownFunctions.Add(Tokens[0].Text);
+                    continue;
+                }
+
+                // Name EQU ... -> constant (treat as global)
+                if (Tokens.Count >= 2
+                    && Tokens[0].Type == TokenType.Unknown
+                    && Tokens[1].Type == TokenType.Directive
+                    && Tokens[1].Text.Equals("equ", StringComparison.OrdinalIgnoreCase))
+                {
+                    KnownGlobals.Add(Tokens[0].Text);
+                    continue;
+                }
+
+                // Name db/dw/dd/dq -> data variable (treat as global)
+                if (Tokens.Count >= 2
+                    && Tokens[0].Type == TokenType.Unknown
+                    && Tokens[1].Type == TokenType.Directive
+                    && DataDefDirectives.Contains(Tokens[1].Text))
+                {
+                    KnownGlobals.Add(Tokens[0].Text);
+                    continue;
+                }
+
+                // Name StructType <> -> struct instance (treat as global)
+                if (Tokens.Count >= 2
+                    && Tokens[0].Type == TokenType.Unknown
+                    && Tokens[1].Type == TokenType.Unknown
+                    && KnownStructures.Contains(Tokens[1].Text))
+                {
+                    KnownGlobals.Add(Tokens[0].Text);
                 }
             }
 

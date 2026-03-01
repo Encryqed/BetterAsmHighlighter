@@ -7,8 +7,11 @@ namespace BetterAsmHighlighter.Core
         Register,
         Directive,
         Number,
+        String,
         Label,
         Function,
+        Structure,
+        Member,
         Global,
         Operator,
         Unknown

@@ -14,6 +14,8 @@ namespace BetterAsmHighlighter.Editor
         public const string STRING      = "asm.string";
         public const string LABEL       = "asm.label";
         public const string FUNCTION    = "asm.function";
+        public const string STRUCTURE   = "asm.structure";
+        public const string MEMBER      = "asm.member";
         public const string GLOBAL      = "asm.global";
         public const string OPERATOR    = "asm.operator";
 
@@ -25,6 +27,8 @@ namespace BetterAsmHighlighter.Editor
         [Export] [Name(STRING)]      [BaseDefinition("string")]     internal static ClassificationTypeDefinition? StringType;
         [Export] [Name(LABEL)]       [BaseDefinition("identifier")] internal static ClassificationTypeDefinition? LabelType;
         [Export] [Name(FUNCTION)]    [BaseDefinition("identifier")] internal static ClassificationTypeDefinition? FunctionType;
+        [Export] [Name(STRUCTURE)]   [BaseDefinition("identifier")] internal static ClassificationTypeDefinition? StructureType;
+        [Export] [Name(MEMBER)]      [BaseDefinition("identifier")] internal static ClassificationTypeDefinition? MemberType;
         [Export] [Name(GLOBAL)]      [BaseDefinition("identifier")] internal static ClassificationTypeDefinition? GlobalType;
         [Export] [Name(OPERATOR)]    [BaseDefinition("operator")]   internal static ClassificationTypeDefinition? OperatorType;
     }

@@ -14,6 +14,11 @@ namespace BetterAsmHighlighter.Core
             "proc", "endp"
         };
 
+        private static readonly HashSet<string> StructDefDirectives = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "struct", "ends"
+        };
+
         public Lexer(HashSet<string> Instructions, HashSet<string> Registers, HashSet<string> Directives)
         {
             this.Instructions = Instructions;
@@ -28,12 +33,14 @@ namespace BetterAsmHighlighter.Core
 
             while (Pos < Line.Length)
             {
-                if (char.IsWhiteSpace(Line[Pos]))    { Pos++; continue; }
-                if (Line[Pos] == ';')                { ReadComment(Tokens, Line, Offset, Pos); break; }
-                if (IsOperator(Line[Pos]))           { ReadOperator(Tokens, Line, Offset, ref Pos); continue; }
-                if (char.IsDigit(Line[Pos]))         { ReadNumber(Tokens, Line, Offset, ref Pos); continue; }
-                if (IsDotDirectiveStart(Line, Pos))  { ReadDotDirective(Tokens, Line, Offset, ref Pos); continue; }
-                if (IsIdentifierStart(Line[Pos]))    { ReadIdentifier(Tokens, Line, Offset, ref Pos); continue; }
+                if (char.IsWhiteSpace(Line[Pos]))           { Pos++; continue; }
+                if (Line[Pos] == ';')                       { ReadComment(Tokens, Line, Offset, Pos); break; }
+                if (Line[Pos] == '"' || Line[Pos] == '\'')  { ReadString(Tokens, Line, Offset, ref Pos); continue; }
+                if (Line[Pos] == '$')                       { Tokens.Add(new Token(TokenType.Number, Offset + Pos, 1, "$")); Pos++; continue; }
+                if (IsOperator(Line[Pos]))                  { ReadOperator(Tokens, Line, Offset, ref Pos); continue; }
+                if (char.IsDigit(Line[Pos]))                { ReadNumber(Tokens, Line, Offset, ref Pos); continue; }
+                if (IsDotDirectiveStart(Line, Pos))         { ReadDotDirective(Tokens, Line, Offset, ref Pos); continue; }
+                if (IsIdentifierStart(Line[Pos]))           { ReadIdentifier(Tokens, Line, Offset, ref Pos); continue; }
 
                 Pos++;
             }
@@ -45,6 +52,21 @@ namespace BetterAsmHighlighter.Core
         private static void ReadComment(List<Token> Tokens, string Line, int Offset, int Pos)
         {
             Tokens.Add(new Token(TokenType.Comment, Offset + Pos, Line.Length - Pos, Line.Substring(Pos)));
+        }
+
+        private static void ReadString(List<Token> Tokens, string Line, int Offset, ref int Pos)
+        {
+            int Start = Pos;
+            char Quote = Line[Pos];
+            Pos++;
+
+            while (Pos < Line.Length && Line[Pos] != Quote)
+                Pos++;
+
+            if (Pos < Line.Length)
+                Pos++;
+
+            Tokens.Add(new Token(TokenType.String, Offset + Start, Pos - Start, Line.Substring(Start, Pos - Start)));
         }
 
         private static void ReadOperator(List<Token> Tokens, string Line, int Offset, ref int Pos)
@@ -88,12 +110,17 @@ namespace BetterAsmHighlighter.Core
                 return;
             }
 
-            // EXTERN/EXTRN name:TYPE -> global declaration
-            if (Pos < Line.Length && Line[Pos] == ':' && IsExternContext(Tokens))
+            // EXTERN/EXTRN name -> global declaration
+            if (IsExternContext(Tokens))
             {
                 Tokens.Add(new Token(TokenType.Global, Offset + Start, Pos - Start, Word));
-                Tokens.Add(new Token(TokenType.Operator, Offset + Pos, 1, ":"));
-                Pos++;
+
+                if (Pos < Line.Length && Line[Pos] == ':')
+                {
+                    Tokens.Add(new Token(TokenType.Operator, Offset + Pos, 1, ":"));
+                    Pos++;
+                }
+
                 return;
             }
 
@@ -122,15 +149,22 @@ namespace BetterAsmHighlighter.Core
 
         private static bool IsExternContext(List<Token> Tokens)
         {
-            for (int i = Tokens.Count - 1; i >= 0; i--)
-            {
-                if (Tokens[i].Type != TokenType.Directive)
-                    continue;
+            bool bHasExtern = false;
 
-                string Text = Tokens[i].Text;
-                return Text.Equals("extern", StringComparison.OrdinalIgnoreCase) || Text.Equals("extrn", StringComparison.OrdinalIgnoreCase);
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (Tokens[i].Type == TokenType.Global)
+                    return false;
+
+                if (Tokens[i].Type == TokenType.Directive)
+                {
+                    string Text = Tokens[i].Text;
+                    if (Text.Equals("extern", StringComparison.OrdinalIgnoreCase) || Text.Equals("extrn", StringComparison.OrdinalIgnoreCase))
+                        bHasExtern = true;
+                }
             }
-            return false;
+
+            return bHasExtern;
         }
 
         private static void PostProcess(List<Token> Tokens)
@@ -156,6 +190,12 @@ namespace BetterAsmHighlighter.Core
             {
                 Tokens[First] = new Token(TokenType.Function, Tokens[First].Start, Tokens[First].Length, Tokens[First].Text);
             }
+
+            // Name STRUCT/ENDS -> name is a structure
+            if (Tokens[First].Type == TokenType.Unknown && Tokens[Second].Type == TokenType.Directive && StructDefDirectives.Contains(Tokens[Second].Text))
+            {
+                Tokens[First] = new Token(TokenType.Structure, Tokens[First].Start, Tokens[First].Length, Tokens[First].Text);
+            }
         }
 
         private static bool IsDotDirectiveStart(string Line, int Pos)
@@ -166,7 +206,8 @@ namespace BetterAsmHighlighter.Core
         private static bool IsOperator(char C)
         {
             return C == '+' || C == '-' || C == '*' || C == '/' ||
-                   C == '[' || C == ']' || C == '(' || C == ')' || C == ',';
+                   C == '[' || C == ']' || C == '(' || C == ')' ||
+                   C == '<' || C == '>' || C == ':' || C == ',';
         }
 
         private static bool IsIdentifierStart(char C)
