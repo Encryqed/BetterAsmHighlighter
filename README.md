@@ -6,14 +6,14 @@ A Visual Studio extension that adds proper syntax highlighting for x86/x64 assem
 
 ## Screenshots
 
-**Dark**
-![Dark theme](Screenshots/dark.png)
+### Dark
+<img src="Screenshots/dark.png">
 
-**Monokai**
-![Monokai theme](Screenshots/monokai.png)
+### Monokai
+<img src="Screenshots/monokai.png">
 
-**Solarized Dark**
-![Solarized Dark theme](Screenshots/solarized-dark.png)
+### Solarized Dark
+<img src="Screenshots/solarized-dark.png">
 
 ## Features
 
