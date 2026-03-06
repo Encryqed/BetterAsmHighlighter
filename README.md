@@ -6,18 +6,14 @@ A Visual Studio extension that adds proper syntax highlighting for x86/x64 assem
 
 ## Screenshots
 
-<table>
-<tr>
-<td><b>Dark</b></td>
-<td><b>Monokai</b></td>
-<td><b>Solarized Dark</b></td>
-</tr>
-<tr>
-<td><img src="Screenshots/dark.png" width="600"></td>
-<td><img src="Screenshots/monokai.png" width="600"></td>
-<td><img src="Screenshots/solarized-dark.png" width="600"></td>
-</tr>
-</table>
+**Dark**
+![Dark theme](Screenshots/dark.png)
+
+**Monokai**
+![Monokai theme](Screenshots/monokai.png)
+
+**Solarized Dark**
+![Solarized Dark theme](Screenshots/solarized-dark.png)
 
 ## Features
 
