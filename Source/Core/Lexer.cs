@@ -101,6 +101,18 @@ namespace BetterAsmHighlighter.Core
 
             string Word = Line.Substring(Start, Pos - Start);
 
+            // x87 FPU register: st(0) through st(7)
+            if (Word.Equals("st", StringComparison.OrdinalIgnoreCase)
+                && Pos + 2 < Line.Length && Line[Pos] == '('
+                && Line[Pos + 1] >= '0' && Line[Pos + 1] <= '7'
+                && Line[Pos + 2] == ')')
+            {
+                string Full = Line.Substring(Start, Pos - Start + 3);
+                Tokens.Add(new Token(TokenType.Register, Offset + Start, Full.Length, Full));
+                Pos += 3;
+                return;
+            }
+
             // Segment override (register followed by ':'), e.g. gs:[rcx]
             if (Pos < Line.Length && Line[Pos] == ':' && Registers.Contains(Word))
             {
@@ -110,8 +122,8 @@ namespace BetterAsmHighlighter.Core
                 return;
             }
 
-            // EXTERN/EXTRN name -> global declaration
-            if (IsExternContext(Tokens))
+            // EXTERN/EXTRN/PUBLIC name -> global declaration
+            if (IsExternContext(Tokens) || IsPublicContext(Tokens))
             {
                 Tokens.Add(new Token(TokenType.Global, Offset + Start, Pos - Start, Word));
 
@@ -165,6 +177,20 @@ namespace BetterAsmHighlighter.Core
             }
 
             return bHasExtern;
+        }
+
+        private static bool IsPublicContext(List<Token> Tokens)
+        {
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (Tokens[i].Type == TokenType.Global)
+                    return false;
+
+                if (Tokens[i].Type == TokenType.Directive && Tokens[i].Text.Equals("public", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
 
         private static void PostProcess(List<Token> Tokens)
