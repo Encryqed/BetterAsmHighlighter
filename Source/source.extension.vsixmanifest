@@ -3,7 +3,7 @@
                  xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
         <Identity Id="BetterAsmHighlighter.Encryqed.f47ac10b-58cc-4372-a567-0e02b2c3d479"
-                  Version="1.0.2"
+                  Version="1.0.3"
                   Language="en-US"
                   Publisher="encryqed"/>
         <DisplayName>Better Assembly Highlighter</DisplayName>
