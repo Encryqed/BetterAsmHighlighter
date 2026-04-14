@@ -226,7 +226,7 @@ namespace BetterAsmHighlighter.Core
 
         private static bool IsDotDirectiveStart(string Line, int Pos)
         {
-            return Line[Pos] == '.' && Pos + 1 < Line.Length && char.IsLetter(Line[Pos + 1]);
+            return Line[Pos] == '.' && Pos + 1 < Line.Length && char.IsLetterOrDigit(Line[Pos + 1]);
         }
 
         private static bool IsOperator(char C)
